@@ -3,7 +3,7 @@ Contributors: denishua
 Tags: Bookmark,Share
 Requires at least: 2.5
 Tested up to: 2.51
-Stable tag: 1.0
+Stable tag: 2.0
 
 <a href="http://17fav.com/">17fav</a> Bookmark & Share WordPress plugin allows users to add your post to many social bookmarking and share sites.
 
@@ -13,6 +13,6 @@ Stable tag: 1.0
 
 == Installation ==
 
-1. Upload the folder bookmark-share to the `/wp-content/plugins/` directory
-1. Activate the plugin through the 'Plugins' menu in WordPress
-1. Navigate to Setting > '17fav Bookmark & Share' to configure plugin output.
+1. Upload the Plugin folder to the `/wp-content/plugins/` directory
+1. Activate the plugin through the `Plugins` menu in WordPress
+1. Navigate to Setting > `ÊÕ²Ø & ·ÖÏí` to configure plugin output.

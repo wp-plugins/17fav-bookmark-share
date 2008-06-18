@@ -3,7 +3,7 @@
 Plugin Name: 17fav Bookmark & Share
 Plugin URI: http://17fav.com/wp-plugin
 Description: Bookmark & Share by <a href="http://fairyfish.net/">Denis</a> & <a href="http://blog.istef.info">Liu Yang</a>
-Version: 1.0
+Version: 2.0
 Author: Denis & LiuYang
 Author URI: http://17fav.com/
 */
@@ -38,8 +38,8 @@ class WPBS {
 		}
 		
 		//initialize the button image
-		$this->imgbtn = get_bloginfo('home')."/wp-content/plugins/bookmark-share/bookmark.gif";
-		$this->iconbtn = get_bloginfo('home')."/wp-content/plugins/bookmark-share/icons.gif";
+		$this->imgbtn = get_bloginfo('siteurl'). "/" .PLUGINDIR . "/" . dirname(plugin_basename (__FILE__))."/bookmark.gif";
+		$this->iconbtn = get_bloginfo('siteurl'). "/" .PLUGINDIR . "/" . dirname(plugin_basename (__FILE__))."/icons.gif";
 		
 		//load jquery & dimensions plugin
 		$this->_load_jquery_lib();
@@ -55,21 +55,25 @@ class WPBS {
 		if (false === get_option('bs_insert2')) {
 			$this->insert2 = true;
 			update_option('bs_insert2',$this->insert2);
-		} else $this->insert2 = get_option('bs_insert2');
+		} else {
+      $this->insert2 = get_option('bs_insert2');
+    }
+    
 		if (false === get_option('bs_insert2home')) {
 			$this->insert2home = false;
 			update_option('bs_insert2home',$this->insert2home);
-		} else $this->insert2home = get_option('bs_insert2home');
+		} else {
+      $this->insert2home = get_option('bs_insert2home');
+    }
+    
 		if (false === get_option('bs_insert2feed')) {
 			$this->insert2feed = true;
 			update_option('bs_insert2feed',$this->insert2feed);
-		} else $this->insert2feed = get_option('bs_insert2feed');
+		} else {
+      $this->insert2feed = get_option('bs_insert2feed');
+    }
 		
-		if ($this->insert2 && !is_feed()) {
-			add_filter('the_content',array(&$this,'bs_add_content'));
-		} elseif (is_feed() && $this->insert2feed) {
-			add_filter('the_content',array(&$this,'bs_add_content_feed'));
-		}
+		add_filter('the_content',array(&$this,'bs_add_content'));
 	}
 	
 	function bs_string($feed_mode = false) {
@@ -124,19 +128,21 @@ class WPBS {
 	}
 	
 	function bs_add_content($text) {
-		if ($this->insert2home) {
+		if (is_home() && $this->insert2home) {
 			return $text . $this->bs_string(false);
-		} else {
-			if (is_single()) {
+		} 
+		
+		if(is_single() && $this->insert2) {
 				return $text . $this->bs_string(false);
-			} else {
-				return $text;
-			}
 		}
+		
+		if(is_feed() && $this->insert2feed) {
+      return $text . $this->bs_string(true);
+		}
+		
+		return $text;
 	}
-	function bs_add_content_feed($text) {
-		return $text . $this->bs_string(true);
-	}
+
 	function bs_header() {
 		$s = $this->_get_services();
 		$css  = '<style type="text/css">';
@@ -306,10 +312,10 @@ class WPBS {
 	}
 	function _load_jquery_lib() {
 		if (!defined('BS_ALREADY_JQUERY') || !BS_ALREADY_JQUERY) {
-			wp_enqueue_script('jquery-dimensions',get_bloginfo('home').'/wp-content/plugins/bookmark-share/jquery.dimensions.js',array('jquery'),'1.1.2');
+			wp_enqueue_script('jquery-dimensions',get_bloginfo('siteurl'). "/" .PLUGINDIR . "/" . dirname(plugin_basename (__FILE__)).'/jquery.dimensions.js',array('jquery'),'1.1.2');
 		} else {
 			if (!defined('BS_ALREADY_JQUERY_DIMENSIONS') || !BS_ALREADY_JQUERY_DIMENSIONS) {
-				wp_enqueue_script('jquery-dimensions',get_bloginfo('home').'/wp-content/plugins/bookmark-share/jquery.dimensions.js',array(),'1.1.2');
+				wp_enqueue_script('jquery-dimensions',get_bloginfo('siteurl'). "/" .PLUGINDIR . "/" . dirname(plugin_basename (__FILE__)).'/jquery.dimensions.js',array(),'1.1.2');
 			}
 		}
 	}
