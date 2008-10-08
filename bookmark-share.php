@@ -3,7 +3,7 @@
 Plugin Name: 17fav Bookmark & Share
 Plugin URI: http://17fav.com/wp-plugin
 Description: Bookmark & Share by <a href="http://fairyfish.net/">Denis</a> & <a href="http://blog.istef.info">Liu Yang</a>
-Version: 3.0
+Version: 3.0.1
 Author: Denis & LiuYang
 Author URI: http://17fav.com/
 */
@@ -13,6 +13,9 @@ Author URI: http://17fav.com/
 define('BS_ALREADY_JQUERY',0);				//if your template or plugin has been loaded jQuery without using wp_enquenue_script, change the value to 1
 define('BS_ALREADY_JQUERY_DIMENSIONS',0);	//if your template or plugin has been loaded jQuery-Dimensions plugin without using wp_enquenue_script, or with a name differ from jquery-dimensions change the value to 1
 //===END JQUERY===
+if (!function_exists('json_encode')) {
+	require_once(dirname(__FILE__)."/portable-pear-json.php");
+}
 
 class WPBS {
 	var $version = "3.0.1";
@@ -693,9 +696,6 @@ class WPBS {
 		require_once(ABSPATH.WPINC.'/class-snoopy.php');
 		$snoopy = new Snoopy;
 		$snoopy->agent = "17fav Bookmark Share Wordpress Plugin v"+$this->version+"($this->uid)";
-		if (!function_exists('json_encode')) {
-			require_once(dirname(__FILE__)."/portable-pear-json.php");
-		}
 		$snoopy->submit($this->bs_server_url . "api/?cmd=$cmd",$params);
 		if ($snoopy->status == 200) {
 			$r=json_decode($snoopy->results);
