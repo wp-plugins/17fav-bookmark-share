@@ -3,7 +3,7 @@
 Plugin Name: 17fav Bookmark & Share
 Plugin URI: http://17fav.com/wp-plugin
 Description: Bookmark & Share by <a href="http://fairyfish.net/">Denis</a> & <a href="http://blog.istef.info">Liu Yang</a>
-Version: 3.0.1
+Version: 3.0.2
 Author: Denis & LiuYang
 Author URI: http://17fav.com/
 */
@@ -18,7 +18,7 @@ if (!function_exists('json_encode')) {
 }
 
 class WPBS {
-	var $version = "3.0.1";
+	var $version = "3.0.2";
 	var $uid;
 	var $popwin;
 	var $insert2;
@@ -76,7 +76,8 @@ class WPBS {
 		add_filter('the_content',array(&$this,'bs_add_content'));
 	
 		//actions
-		add_action('wp_header',array(&$this,'bs_header'));
+		add_action('wp_head',array(&$this,'bs_header'));
+		add_action('admin_head',array(&$this,'bs_admin_head'));
 		add_action('wp_footer',array(&$this,'bs_footer'));
 		add_action('admin_menu',array(&$this,'admin_page'));
 	}
@@ -98,9 +99,13 @@ class WPBS {
 	}
 	function bs_header() {
 		$this->footer_forms = '';
+		echo $this->bs_code(false,'head');
+	}
+	function bs_admin_head() {
+		echo $this->bs_code(true,'head');
 	}
 	function bs_footer() {
-		echo $this->bs_code();
+		echo $this->bs_code(false,'footer');
 		echo '<div style="display:none">';
 		echo $this->footer_forms;
 		echo '</div>';
@@ -162,7 +167,8 @@ class WPBS {
 	}
 
 	
-	function bs_code($preview = false) {
+	function bs_code($preview = false,$where = 'all') {
+		$css = ''; $js = ''; $html = '';
 		$all_servs = $this->_get_all_services();
 		$serv_slugs = $this->_get_services();
 		$servs = array();
@@ -174,105 +180,108 @@ class WPBS {
 				}
 			}
 		}
-		list(
-			$bs_btn,
-			$bg_color,
-			$bg_border_color,
-			$title_bg_color,
-			$title_text_color,
-			$item_text_color,
-			$item_hover_border_color
-			) = $this->_get_color_schemes();
-		
-		$css = '<style type="text/css">';
-		$css .= '#bs-17fav-pop{background:'.$bg_color.';width:310px;border:1px solid '.$bg_border_color;
-		if (!$preview) {
-			$css .= ';position:absolute;display:none';
-		}
-		$css .= '} ';
-		$css .= '#bs-17fav-pop h1{margin:0;padding:5px 10px;text-align:left;font-size:14px;color:'.$title_text_color.';background:'.$title_bg_color.'} ';
-		$css .= '#bs-17fav-pop h3{clear:both;margin:0;padding:2px 10px;text-align:right;font-size:10px;font-weight:normal;background:'.$title_bg_color.';color:'.$title_text_color.'} ';
-		$css .= '#bs-17fav-pop h3 a,#bs-17fav-pop h3 a:hover{color:'.$title_text_color.'} ';
-		$css .= 'ul.bs-17fav-list{margin:0;padding:5px;list-style:none;width:300px;} ';
-		$css .= 'li.bs-17fav-item{cursor:pointer;display:block;float:left;width:140px;overflow:hidden;height:22px;padding:1px;margin:2px 4px;list-style:none;position:relative} ';
-		$css .= 'li.bs-17fav-item-hover{padding:0;border:1px solid '.$item_hover_border_color.'} ';
-		$css .= 'li.bs-17fav-item span.bs-17fav-icon{display:block;position:absolute;width:16px;height:16px;top:3px;left:3px;overflow:hidden} ';
-		if ($preview) $css_servs = &$all_servs->detail;
-		else $css_servs = &$servs;
-		foreach ($css_servs as $serv) {
-			$css .= 'li#bs-17fav-item-'.$serv->slug.' span.bs-17fav-icon{background:url('.$all_servs->url.') no-repeat -'.$serv->left.'px -'.$serv->top.'px} ';
-		}
-		$css .= 'li.bs-17fav-item span.bs-17fav-text{display:block;height:22px;line-height:22px;width:110px;position:absolute;top:0;left:30px;text-align:left;font-size:12px;color:'.$item_text_color.'} ';
-		$css .= '</style>';
-		$js = '<script type="text/javascript">';
-		$js .= 'jQuery(document).ready(function(){jQuery(".bs-17fav-item").hover(function(){jQuery(this).addClass("bs-17fav-item-hover");},function(){jQuery(this).removeClass("bs-17fav-item-hover");});});';
-		if (!$preview){
-			$js .= 'var BSJS={';
+		if ($where == 'all' || $where == 'head') {
+			list(
+				$bs_btn,
+				$bg_color,
+				$bg_border_color,
+				$title_bg_color,
+				$title_text_color,
+				$item_text_color,
+				$item_hover_border_color
+				) = $this->_get_color_schemes();
 			
-			$js .= 'mouse_in_pos: [],';
-			
-			$js .= 'bsthis:function(i,s){';
-			$js .= 'if (i<=0) return;';
-			$js .= 'var fid = "fav-post-"+i;';
-			$js .= 'theForm = jQuery("#"+fid);';
-			$js .= 	'if (s.length>0) { ';
-			$js .= 		'theForm.get(0).action = "http://17fav.com/redirect.php";';
-			$js .= 		'theForm.children("input").each(function(){if (this.name == "bs17fav_server") this.value=s;});';
-			$js .= 	'} else {';
-			$js .= 		'theForm.get(0).action = "http://17fav.com/index.php";';
-			$js .= 	'}';
-			if ($this->popwin) {
-			$js .= 	'theForm.submit(function(){var e=window.open("http://17fav.com/","bs_popwin"); if (e==null) {alert("Your browser doesn\'t allow our window to popup. Please fix the settings"); return false;} else {return true;}});';
+			$css = '<style type="text/css">';
+			$css .= '#bs-17fav-pop{background:'.$bg_color.';width:310px;border:1px solid '.$bg_border_color;
+			if (!$preview) {
+				$css .= ';position:absolute;display:none';
 			}
-			$js .= 	'theForm.submit();';
-			$js .= '},';
-			
-			$js .= 'hover_in_btn: function(e){';
-			$js .= 		'var btn_rel = this.rel;';
-			$js .=		'BSJS.mouse_in_pos =[e.pageX,e.pageY];';
-			$js .= 		'var btnp = jQuery(this).position();';
-			$js .= 		'jQuery("#bs-17fav-pop").css({left:btnp.left,top:btnp.top,marginTop:jQuery(this).height()});';
-			$js .=		'jQuery("#bs-17fav-pop").children("ul").children("li").each(function(){this.rel=btn_rel;});';
-			$js .= 		'jQuery("#bs-17fav-pop").fadeIn("fast");';
-			$js .= '},';
-			
-			$js .= 'hover_out_btn: function(e){';
-			$js .= 		'if (e.pageY <= BSJS.mouse_in_pos[1]) jQuery("#bs-17fav-pop").fadeOut("fast");';
-			$js .= '},';
-			$js .= 'hover_in_box: function(){';
-			$js .= '},';
-			$js .= 'hover_out_box: function(){';
-			$js .= 		'jQuery(this).fadeOut("fast");';
-			$js .= '},';
-			
-			$js .= '};';
-			
-			$js .= 'jQuery(document).ready(function(){';
-			$js .= 'jQuery(".btn-17fav").hover(BSJS.hover_in_btn,BSJS.hover_out_btn);';
-			$js .= 'jQuery("#bs-17fav-pop").hover(BSJS.hover_in_box,BSJS.hover_out_box);';
-			$js .= 'jQuery(".btn-17fav").click(function(){BSJS.bsthis(this.rel,"");return false;});';
-			$js .= 'jQuery(".bs-17fav-item").click(function(){BSJS.bsthis(this.rel,this.id.substr(14));});';
-			$js .= '});';
-		}
-		$js .= '</script>';
-		$html = '<div id="bs-17fav-pop">';
-		$html .= '<h1>收藏 & 分享</h1>';
-		$html .= '<ul class="bs-17fav-list"';
-		if ($preview) $html .= ' id="bs-17fav-list-preview"';
-		$html .= '>';
-		if (!$preview) {
-			foreach($servs as $s) {
-				$temp = '<li class="bs-17fav-item" id="bs-17fav-item-%s">';
-				$temp .= '<span class="bs-17fav-icon"></span>';
-				$temp .= '<span class="bs-17fav-text">%s</span>';
-				$temp .= '</li>';
-				$html .= sprintf($temp,$s->slug,$s->title);
+			$css .= '} ';
+			$css .= '#bs-17fav-pop h1{margin:0;padding:5px 10px;text-align:left;font-size:14px;color:'.$title_text_color.';background:'.$title_bg_color.'} ';
+			$css .= '#bs-17fav-pop h3{clear:both;margin:0;padding:2px 10px;text-align:right;font-size:10px;font-weight:normal;background:'.$title_bg_color.';color:'.$title_text_color.'} ';
+			$css .= '#bs-17fav-pop h3 a,#bs-17fav-pop h3 a:hover{color:'.$title_text_color.'} ';
+			$css .= 'ul.bs-17fav-list{margin:0;padding:5px;list-style:none;width:300px;} ';
+			$css .= 'li.bs-17fav-item{cursor:pointer;display:block;float:left;width:140px;overflow:hidden;height:22px;padding:1px;margin:2px 4px;list-style:none;position:relative} ';
+			$css .= 'li.bs-17fav-item-hover{padding:0;border:1px solid '.$item_hover_border_color.'} ';
+			$css .= 'li.bs-17fav-item span.bs-17fav-icon{display:block;position:absolute;width:16px;height:16px;top:3px;left:3px;overflow:hidden} ';
+			if ($preview) $css_servs = &$all_servs->detail;
+			else $css_servs = &$servs;
+			foreach ($css_servs as $serv) {
+				$css .= 'li#bs-17fav-item-'.$serv->slug.' span.bs-17fav-icon{background:url('.$all_servs->url.') no-repeat -'.$serv->left.'px -'.$serv->top.'px} ';
 			}
+			$css .= 'li.bs-17fav-item span.bs-17fav-text{display:block;height:22px;line-height:22px;width:110px;position:absolute;top:0;left:30px;text-align:left;font-size:12px;color:'.$item_text_color.'} ';
+			$css .= '</style>';
+			$js = '<script type="text/javascript">';
+			$js .= 'jQuery(document).ready(function(){jQuery(".bs-17fav-item").hover(function(){jQuery(this).addClass("bs-17fav-item-hover");},function(){jQuery(this).removeClass("bs-17fav-item-hover");});});';
+			if (!$preview){
+				$js .= 'var BSJS={';
+				
+				$js .= 'mouse_in_pos: [],';
+				
+				$js .= 'bsthis:function(i,s){';
+				$js .= 'if (i<=0) return;';
+				$js .= 'var fid = "fav-post-"+i;';
+				$js .= 'theForm = jQuery("#"+fid);';
+				$js .= 	'if (s.length>0) { ';
+				$js .= 		'theForm.get(0).action = "http://17fav.com/redirect.php";';
+				$js .= 		'theForm.children("input").each(function(){if (this.name == "bs17fav_server") this.value=s;});';
+				$js .= 	'} else {';
+				$js .= 		'theForm.get(0).action = "http://17fav.com/index.php";';
+				$js .= 	'}';
+				if ($this->popwin) {
+				$js .= 	'theForm.submit(function(){var e=window.open("http://17fav.com/","bs_popwin"); if (e==null) {alert("Your browser doesn\'t allow our window to popup. Please fix the settings"); return false;} else {return true;}});';
+				}
+				$js .= 	'theForm.submit();';
+				$js .= '},';
+				
+				$js .= 'hover_in_btn: function(e){';
+				$js .= 		'var btn_rel = this.rel;';
+				$js .=		'BSJS.mouse_in_pos =[e.pageX,e.pageY];';
+				$js .= 		'var btnp = jQuery(this).position();';
+				$js .= 		'jQuery("#bs-17fav-pop").css({left:btnp.left,top:btnp.top,marginTop:jQuery(this).height()});';
+				$js .=		'jQuery("#bs-17fav-pop").children("ul").children("li").each(function(){this.rel=btn_rel;});';
+				$js .= 		'jQuery("#bs-17fav-pop").fadeIn("fast");';
+				$js .= '},';
+				
+				$js .= 'hover_out_btn: function(e){';
+				$js .= 		'if (e.pageY <= BSJS.mouse_in_pos[1]) jQuery("#bs-17fav-pop").fadeOut("fast");';
+				$js .= '},';
+				$js .= 'hover_in_box: function(){';
+				$js .= '},';
+				$js .= 'hover_out_box: function(){';
+				$js .= 		'jQuery(this).fadeOut("fast");';
+				$js .= '}';
+				
+				$js .= '};';
+				
+				$js .= 'jQuery(document).ready(function(){';
+				$js .= 'jQuery(".btn-17fav").hover(BSJS.hover_in_btn,BSJS.hover_out_btn);';
+				$js .= 'jQuery("#bs-17fav-pop").hover(BSJS.hover_in_box,BSJS.hover_out_box);';
+				$js .= 'jQuery(".btn-17fav").click(function(){BSJS.bsthis(this.rel,"");return false;});';
+				$js .= 'jQuery(".bs-17fav-item").click(function(){BSJS.bsthis(this.rel,this.id.substr(14));});';
+				$js .= '});';
+			}
+			$js .= '</script>';
 		}
-		$html .= '</ul>';
-		$html .= '<h3>Powered by <a href="http://17fav.com">17fav.com</a></h3>';
-		$html .= '</div>';
-		
+		if ($where == 'all' || $where == 'footer') {
+			$html = '<div id="bs-17fav-pop">';
+			$html .= '<h1>收藏 &amp; 分享</h1>';
+			$html .= '<ul class="bs-17fav-list"';
+			if ($preview) $html .= ' id="bs-17fav-list-preview"';
+			$html .= '>';
+			if (!$preview) {
+				foreach($servs as $s) {
+					$temp = '<li class="bs-17fav-item" id="bs-17fav-item-%s">';
+					$temp .= '<span class="bs-17fav-icon"></span>';
+					$temp .= '<span class="bs-17fav-text">%s</span>';
+					$temp .= '</li>';
+					$html .= sprintf($temp,$s->slug,$s->title);
+				}
+			}
+			$html .= '</ul>';
+			$html .= '<h3>Powered by <a href="http://17fav.com">17fav.com</a></h3>';
+			$html .= '</div>';
+		}
 		return $css.$js.$html;
 	}
 	
@@ -530,7 +539,7 @@ class WPBS {
 			jQuery('li.bs-17fav-item-hover').css({borderColor:bs_colors[5]});
 			jQuery('li.bs-17fav-item span.bs-17fav-text').css({color:bs_colors[4]});
 			
-		},
+		}
 	};
 	
 	jQuery(document).ready(function(){
@@ -620,7 +629,7 @@ class WPBS {
 				</td>
 				<td style="border:0">
 					<h3>预览</h3>
-					<?php echo $this->bs_code(true);?>
+					<?php echo $this->bs_code(true,'footer');?>
 				</td>
 			</tr></table></td>
 		</tr>
