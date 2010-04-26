@@ -20,6 +20,13 @@ function bshare($content){
     if(is_single() || is_page()){
         $content = $content.'<div style="margin-bottom:10px">'.htmlspecialchars_decode(get_option("bshare_code")).'</div>';
     }
+	/*
+	elseif(is_feed()){
+        global $post;
+        $bshare_feed_code = '<p><a href="http://17fav.com/?url='.urlencode(get_permalink($post->ID)).'&title='.urlencode($post->post_title).'" title="用 17fav 收藏和分享本文"><img src="http://17fav.com/i/bookmark.gif" alt="17fav 收藏本文" /></a></p>';
+        $content = $content.$bshare_feed_code;
+    }
+	*/
     return $content;
 }
 
