@@ -2,8 +2,8 @@
 /*
 Plugin Name: bShare 分享
 Plugin URI: http://www.bshare.cn/wordpressRegister
-Description: 数以万计的分享，源自一个简单的按钮， <a href="http://www.bshare.cn/">bShare 分享</a> 是一个强大的网页分享插件工具，您的读者可以将您网站上精采的内容快速分享、转贴到社群网络上。<a href="options-general.php?page=bookmark-bshare.php">点击这里进行配置</a>。
-Version: 4.1
+Description: 数以万计的分享，源自一个简单的按钮， <a href="http://www.bshare.cn/">bShare 分享</a> 是一个强大的网页分享插件工具，您的读者可以将您网站上精采的内容快速分享、转贴到社群网络上。<a href="options-general.php?page=bookmark-share.php">点击这里进行配置</a>。
+Version: 4.1.0
 Author: Buzzinate, Denis
 Author URI: http://www.bshare.cn
 */
@@ -21,7 +21,7 @@ function bshare($content){
         $content = $content.'<div style="margin-bottom:10px">'.htmlspecialchars_decode(get_option("bshare_code")).'</div>';
     } else if(is_feed()) {
         global $post;
-        $bshare_feed_code = '<p><a href="http://www.bshare.cn/share?url='.urlencode(get_permalink($post->ID)).'&title='.urlencode($post->post_title).'" title="用 bShare分享或收藏本文"><img src="http://static.bshare.cn/frame/images/button_custom1-zh.gif" alt="17fav 收藏本文" /></a></p>';
+        $bshare_feed_code = '<p><a href="http://www.bshare.cn/share?url='.urlencode(get_permalink($post->ID)).'&title='.urlencode($post->post_title).'" title="用bShare分享或收藏本文"><img src="http://static.bshare.cn/frame/images/button_custom1-zh.gif" alt="用bShare分享或收藏本文" /></a></p>';
         $content = $content.$bshare_feed_code;
     }
     return $content;
