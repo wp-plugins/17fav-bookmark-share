@@ -12,21 +12,18 @@ load_plugin_textdomain('bshare');
 $bshareCode = get_option("bshare_code");
 if  ($bshareCode == "") {
     update_option("bshare_code", 
-        '<script language="javascript" type="text/javascript" src="http://www.bshare.cn/button.js"></script>'); 
+        '<a class="bshareDiv" target="_blank" href="http://www.bshare.cn/share">分享&收藏</a><script language="javascript" type="text/javascript" src="http://www.bshare.cn/button.js"></script>'); 
 }
 
 add_filter('the_content', 'bshare');
 function bshare($content){
     if(is_single() || is_page()){
         $content = $content.'<div style="margin-bottom:10px">'.htmlspecialchars_decode(get_option("bshare_code")).'</div>';
-    }
-	/*
-	elseif(is_feed()){
+    } else if(is_feed()) {
         global $post;
-        $bshare_feed_code = '<p><a href="http://17fav.com/?url='.urlencode(get_permalink($post->ID)).'&title='.urlencode($post->post_title).'" title="用 17fav 收藏和分享本文"><img src="http://17fav.com/i/bookmark.gif" alt="17fav 收藏本文" /></a></p>';
+        $bshare_feed_code = '<p><a href="http://www.bshare.cn/share?url='.urlencode(get_permalink($post->ID)).'&title='.urlencode($post->post_title).'" title="用 bShare分享或收藏本文"><img src="http://static.bshare.cn/frame/images/button_custom1-zh.gif" alt="17fav 收藏本文" /></a></p>';
         $content = $content.$bshare_feed_code;
     }
-	*/
     return $content;
 }
 
