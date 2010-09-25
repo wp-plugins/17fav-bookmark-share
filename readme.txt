@@ -3,7 +3,7 @@ Contributors: Buzzinate
 Tags: Share,Bookmark,分享,书签,收藏
 Requires at least: 2.5
 Tested up to: 3.0.1
-Stable tag: 4.0.3
+Stable tag: 4.1.0
 
 数以万计的分享，源自一个简单的按钮， <a href="http://www.bshare.cn/">bShare 分享</a> 是一个强大的网页分享插件工具，您的读者可以将您网站上精采的内容快速分享、转贴到社群网络上。
 
